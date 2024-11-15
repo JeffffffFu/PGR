@@ -34,5 +34,5 @@ python main.py --algorithm Original --dataset Emory
 
 You can run the TIA by adding the following
 ```bash
--- attack=TIA
--- attack=TIA-PGR
+-- attacks TIA
+-- attacks TIA-PGR

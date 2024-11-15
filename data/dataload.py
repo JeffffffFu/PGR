@@ -29,7 +29,7 @@ def load_data(dataset_name):
         dataset = LastFMAsia(root='./data/LastFMAsia')
     elif dataset_name == "raw_lastfm":
         dataset = partial(KarateClub, name='lastfm')(root='./data/')
-    elif dataset_name == 'Duke':
+    elif dataset_name == 'duke':
         dataset = partial(Facebook, name='Duke14', target='year'
                 ,transform=Compose([FilterClassByCount(min_count=1000, remove_unlabeled=True)]))
         dataset = dataset(root=r'./data/facebook/')
@@ -37,7 +37,7 @@ def load_data(dataset_name):
         dataset = partial(Facebook, name='Yale4', target='year'
                 ,transform=Compose([FilterClassByCount(min_count=1000, remove_unlabeled=True)]))
         dataset = dataset(root=r'./data/facebook/')
-    elif dataset_name == 'Emory':
+    elif dataset_name == 'emory':
         dataset = partial(Facebook, name='Emory27', target='year'
                 ,transform=Compose([FilterClassByCount(min_count=1000, remove_unlabeled=True)]))
         dataset = dataset(root=r'./data/facebook/')

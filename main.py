@@ -26,7 +26,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--algorithm', type=str, default='Original',choices=['PGR','Original'])
     parser.add_argument('--dataset', type=str, default='cora'
-                            ,choices=['cora', 'citeseer','Duke','Lastfm','Emory'])
+                            ,choices=['cora', 'citeseer','duke','lastfm','emory'])
     parser.add_argument('--device', type=str, default='cuda:0',choices=['cpu','cuda:3','cuda:0','cuda:1','cuda:2'])
     parser.add_argument('--fastmode', action='store_true', default=False,
                         help='Validate during training pass.')

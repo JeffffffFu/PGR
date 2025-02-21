@@ -37,9 +37,12 @@ def load_data_local(path="data/cora/", dataset="cora"):
     adj = sp.coo_matrix((np.ones(edges.shape[0]), (edges[:, 0], edges[:, 1])),
                         shape=(labels.shape[0], labels.shape[0]),
                         dtype=np.float32)
+    # build symmetric adjacency matrix
     adj = adj + adj.T.multiply(adj.T > adj) - adj.multiply(adj.T > adj)
 
+    #features = normalize(features)
 
+    #exit()
 
     adj = normalize(adj + sp.eye(adj.shape[0]))
 
@@ -47,7 +50,7 @@ def load_data_local(path="data/cora/", dataset="cora"):
     idx_val = range(271, 271)
     idx_test = range(272, 2708)
 
-    random.seed(3407)
+    random.seed(3407)  # 设置随机种子为42
     numbers = range(2708)
     idx_train = random.sample(numbers, 270)
     idx_test = [num for num in numbers if num not in idx_train]
@@ -93,6 +96,7 @@ def replace_elements(A, B, indices):
 
 def split_dataset(label,ratio_of_train,seed):
 
+    # 设置随机种子
     random.seed(seed)
     torch.manual_seed(seed)
 

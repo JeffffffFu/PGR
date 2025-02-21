@@ -1,0 +1,1 @@
+from .deepwalk import deepwalk, deepwalk_v2

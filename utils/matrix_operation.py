@@ -31,6 +31,7 @@ def edge_matrix():
     features = sp.csr_matrix(idx_features_labels[:, 1:-1], dtype=np.float32)
     labels = encode_onehot(idx_features_labels[:, -1])
 
+    # build graph
     idx = np.array(idx_features_labels[:, 0], dtype=np.int32)
     idx_map = {j: i for i, j in enumerate(idx)}
     edges_unordered = np.genfromtxt("{}{}.cites".format(path, dataset),
@@ -40,6 +41,7 @@ def edge_matrix():
     adj = sp.coo_matrix((np.ones(edges.shape[0]), (edges[:, 0], edges[:, 1])),
                         shape=(labels.shape[0], labels.shape[0]),
                         dtype=np.float32)
+    # build symmetric adjacency matrix
     adj = adj + adj.T.multiply(adj.T > adj) - adj.multiply(adj.T > adj)
     adj = adj + sp.eye(adj.shape[0])
     adj = sparse_mx_to_torch_sparse_tensor(adj)
@@ -70,7 +72,6 @@ def dense_adj_to_adj_sparse_adj(dense_adj):
     mask = row_indices < col_indices
     row_indices = row_indices[mask]
     col_indices = col_indices[mask]
-
 
     sparse_adj = torch.vstack((row_indices, col_indices))
 

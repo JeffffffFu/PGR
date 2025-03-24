@@ -22,6 +22,15 @@ python main.py --algorithm PGR --dataset lastfm --prune 0.5 --mu 0.0 --epochs_in
 python main.py --algorithm PGR --dataset duke --prune 0.05 --mu 0.0 --epochs_inner 1 
 python main.py --algorithm PGR --dataset emory --prune 0.05 --mu 0.0 --epochs_inner 1 
 ```
+
+For GAT model:
+
+```bash
+python main.py --algorithm PGR --dataset cora --prune 0.2 --mu 0.0 --epochs_inner 1 --network GAT
+python main.py --algorithm PGR --dataset citeseer --prune 0.2 --mu 0.0 --epochs_inner 1 --network GAT
+python main.py --algorithm PGR --dataset emory --prune 0.06 --mu 0.0 --epochs_inner 1 --network GAT
+```
+
 You can run the Original model (no dp) directly with the following default parameters:
 
 ```bash

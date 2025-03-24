@@ -286,11 +286,11 @@ def train_with_LPGNet(data,eps,idx_train,idx_val,idx_test):
     model,features,labels,adj,device=LPGNet(data,eps,idx_train,idx_val,idx_test)
     outputs=LPGNet_inference(model, features,labels,adj,device)
     output=outputs[0]
-    start_time = time.time()  # 记录开始时间
+    start_time = time.time()
 
     acc_test = accuracy(output[idx_test], data.y[idx_test])
-    end_time  = time.time()  # 记录开始时间
-    execution_time = end_time - start_time  # 计算运行时间
+    end_time  = time.time()
+    execution_time = end_time - start_time
     print(f'execution_time: {execution_time:.4f}')
 
 
@@ -314,12 +314,9 @@ def train_with_LPGNet_output(data,eps,idx_train,idx_val,idx_test):
 #     data = dataset[0]
 #     # mmlp_model, test_features, test_adj_orig_csr, device = train_model(data)
 #     eps = 4.0
-#     # train_model输入分别为训练数据集，隐私预算。返回四个值，第一个值代表模型，其他值可以忽略，
-#     # 我这里为了能够在if __name__ == "__main__":这里运行没有删掉其他返回值的相关代码
+
 #     ret = train_model(data,eps)
 #     print("ret[0]:",ret[0])
 #     exit()
-#     # test函数接收四个参数，分别是模型，测试集节点特征，测试集邻接矩阵，设备。返回值为测试集节点logits
 #     logits = test(ret[0][0],ret[0][1],ret[0][2],ret[1])
 
-    # LPGNet的攻击我们不保存网络结构了，它运行起来挺快的，我们考虑直接运行进行攻击

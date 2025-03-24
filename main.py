@@ -12,6 +12,7 @@ from baseline.Lap_and_RR.LapEdge import graph_normal_training_perturb_LAP
 from baseline.Lap_and_RR.RandEdge import graph_normal_training_perturb_RR
 from baseline.PPRL.GNNPrivacy import train_with_PPRL
 from baseline.PrivGraph_main.priv_graph import train_with_privGraph
+from utils.get_network import get_network
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3"
 import argparse
@@ -34,7 +35,7 @@ def main():
     parser.add_argument('--algorithm', type=str, default='Original',choices=['PGR','Original','LapEdge','EdgeRand','LPGNet','PPRL','privGraph','GAP','Eclipse'])
     parser.add_argument('--dataset', type=str, default='cora'
                             ,choices=['cora', 'citeseer','duke','lastfm','emory'])
-    parser.add_argument('--device', type=str, default='cuda:0',choices=['cpu','cuda:3','cuda:0','cuda:1','cuda:2'])
+    parser.add_argument('--device', type=str, default='cuda:3',choices=['cpu','cuda:3','cuda:0','cuda:1','cuda:2'])
     parser.add_argument('--fastmode', action='store_true', default=False,
                         help='Validate during training pass.')
     parser.add_argument('--seed', type=int, default=3407, help='Random seed.')
@@ -55,6 +56,7 @@ def main():
     parser.add_argument('--ratio_of_train_set', type=float, default='0.1')
     parser.add_argument('--mu', type=float, default='0.0')
     parser.add_argument('--attacks', type=str, default='None',choices=['None','TIA','TIA-PGR'])
+    parser.add_argument('--network', type=str, default='GCN',choices=['GCN','GNN','GAT'])
     parser.add_argument('--hops', type=int, default=2)
     parser.add_argument('--eps', type=float, default=7)
 
@@ -78,6 +80,7 @@ def main():
     attack=args.attacks
     hops=args.hops
     eps=args.eps
+    network=args.network
 
     dataset=load_data(dataset_name)
     data = dataset[0]
@@ -85,7 +88,7 @@ def main():
 
     features=data.x.to(device)
     labels=data.y.to(device)
-
+    model=get_network(network, hops, features, labels, hidden, dropout, device)
     preds=None
 
     idx_train,idx_val,idx_test=split_dataset(labels,ratio_of_train_set,seed)
@@ -94,19 +97,18 @@ def main():
         acc_test, num_priv_edges, num_rengen_edges, model, regen_adj = graph_regenerate_different(algorithm,features,
                                                                                                   dense_matrix, dense_matrix,labels,
                                                                                                   idx_train, idx_val,
-                                                                                                  idx_test, hidden,
-                                                                                                  dropout, lr,
+                                                                                                  idx_test, lr,
                                                                                                   weight_decay, epochs,
                                                                                                   epochs_inner, prune,
                                                                                                   device,
-                                                                                                  mu, preds)
+                                                                                                  mu, model,network)
 
 
     elif algorithm == 'Original':
-        acc_test,num_priv_edges,num_rengen_edges,model,regen_adj=graph_normal_training(features, dense_matrix, labels, idx_train, idx_val, idx_test, hidden, dropout, lr,weight_decay, epochs,hops,device)
+        acc_test,num_priv_edges,num_rengen_edges,model,regen_adj=graph_normal_training(features, dense_matrix, labels, idx_train, idx_val, idx_test, hidden, dropout, lr,weight_decay, epochs,network,model,device)
 
     elif algorithm == 'privGraph':
-        acc_test, num_priv_edges, num_rengen_edges, model, regen_adj = train_with_privGraph(eps,features, dense_matrix, labels, idx_train, idx_val, idx_test, hidden, dropout, lr,weight_decay, epochs, device)
+        acc_test, num_priv_edges, num_rengen_edges, model, regen_adj = train_with_privGraph(eps,features, dense_matrix, labels, idx_train, idx_val, idx_test, model, network, lr,weight_decay, epochs, device)
     elif algorithm == 'GAP':
         acc_test,preds,data_init,model=train_with_GAP(dataset_name,eps,hops,device)
         regen_adj=dense_matrix
@@ -115,7 +117,7 @@ def main():
     elif algorithm == 'PPRL':
         acc_test,model,features,regen_adj=train_with_PPRL(copy.deepcopy(data), idx_train, idx_val, idx_test)
     elif algorithm == 'Eclipse':
-        acc_test, num_priv_edges, num_rengen_edges, model, regen_adj = train_with_Eclipse(eps,features, dense_matrix, labels, idx_train, idx_val, idx_test, hidden, dropout, lr,weight_decay, epochs, device)
+        acc_test, num_priv_edges, num_rengen_edges, model, regen_adj = train_with_Eclipse(eps,features, dense_matrix, labels, idx_train, idx_val, idx_test, model, network, lr,weight_decay, epochs, device)
     elif algorithm == 'LapEdge':
         acc_test, num_priv_edges, num_rengen_edges, model, regen_adj = graph_normal_training_perturb_LAP(eps, features,
                                                                                                          dense_matrix,
@@ -123,8 +125,7 @@ def main():
                                                                                                          idx_train,
                                                                                                          idx_val,
                                                                                                          idx_test,
-                                                                                                         hidden,
-                                                                                                         dropout, lr,
+                                                                                                         model, network, lr,
                                                                                                          weight_decay,
                                                                                                          epochs, device)
     elif algorithm=='EdgeRand':
@@ -134,7 +135,7 @@ def main():
                                                                                                         idx_train,
                                                                                                         idx_val,
                                                                                                         idx_test,
-                                                                                                        hidden, dropout,
+                                                                                                        model, network,
                                                                                                         lr,
                                                                                                         weight_decay,
                                                                                                         epochs, device)
@@ -145,9 +146,7 @@ def main():
     else:
         raise ValueError("this algorithm is not exist")
 
-
-
-    print("acc_test:",acc_test)
+    print(f'{attack}|{network}|{algorithm}|{dataset_name}|test_acc:{acc_test}')
 
     if attack=='TIA':
         if algorithm == 'GAP':
@@ -156,14 +155,14 @@ def main():
 
             TPL_M,TPL_C, TPL_I = TIA(algorithm, data, model, dense_matrix, features,regen_adj,labels, device,hops, seed)
 
-        print(f'{attack}|{algorithm}|{dataset_name}|{TPL_M}|{TPL_C}|{TPL_I}')
+        print(f'{attack}|{network}|{algorithm}|{dataset_name}|{TPL_M}|{TPL_C}|{TPL_I}')
 
 
     if attack=='TIA-PGR':
 
         TPL_M, TPL_C,TPL_I = TIA_PGR( data, model, dense_matrix, features,regen_adj,labels, device,hops, seed)
 
-        print(f'{attack}|{algorithm}|{dataset_name}|{TPL_M}|{TPL_C}|{TPL_I}')
+        print(f'{attack}|{network}|{algorithm}|{dataset_name}|{TPL_M}|{TPL_C}|{TPL_I}')
 
 
 

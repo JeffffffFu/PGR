@@ -36,7 +36,6 @@ def create_model(
 
     return model
 
-#用的应该是这个
 class MultiMLP(nn.Module):
     def __init__(
         self,

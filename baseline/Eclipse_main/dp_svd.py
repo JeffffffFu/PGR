@@ -4,7 +4,7 @@ from scipy.linalg import svd
 import torch
 import numpy as np
 
-from mask.add_diagonal_matrix import add_diagonal_and_normalize_edge
+from mask.add_diagonal_matrix import add_diagonal_and_normalize_edge, self_connecting
 from model.GCN import GCN
 import torch.optim as optim
 
@@ -13,10 +13,10 @@ from utils.train import train, test
 
 
 def dp_svd(matrix,eps):
-    rank=50    #根据文章的建议，取个合适的值
+    rank=50
     edges=torch.count_nonzero(matrix)
     u, s, Vh = svd(matrix)
-    eps_e = 0.01 * eps  # 一部分隐私预算给边数量
+    eps_e = 0.01 * eps
     eps_l = eps - eps_e
     lap_noise = torch.distributions.Laplace(0, 1.0 / eps_e).sample((1,))
 
@@ -41,40 +41,39 @@ def dp_svd(matrix,eps):
     row_indices, col_indices = np.unravel_index(flat_indices, arr.shape)
     arr.fill(0.0)
     arr[row_indices, col_indices] = 1.0
-    arr += arr.T   #此时还没有对角并且进行正则化
+    arr += arr.T
     arr=torch.tensor(arr).to(torch.float32)
 
 
     return arr
 
 #《Edge Private Graph Neural Networks with Singular Value Perturbation》
-def train_with_Eclipse(eps,features, adj, labels, idx_train, idx_val, idx_test, hidden, dropout, lr,weight_decay, epochs, device):
+def train_with_Eclipse(eps,features, adj, labels, idx_train, idx_val, idx_test, model, network, lr,weight_decay, epochs, device):
 
 
     dense_matrix= dp_svd(adj,eps)
 
 
+    if network=='GCN':
+        A_hat = add_diagonal_and_normalize_edge(dense_matrix,device)
+    else:
+        A_hat = self_connecting(dense_matrix, device)
 
 
-    A_hat = add_diagonal_and_normalize_edge(dense_matrix, device)  # 进行自连接后正则化
     edge_num = torch.count_nonzero(dense_matrix)
-    print("生成后的边数（不包括自连接）:", edge_num)
+    print("edge:", edge_num)
 
-    model = GCN(nfeat=features.shape[1],
-                nhid=hidden,
-                nclass=labels.max().item() + 1,
-                dropout=dropout).to(device)
+
 
     optimizer = optim.Adam(model.parameters(),
                            lr=lr, weight_decay=weight_decay)
 
-    # 正常训练
     train( epochs, features, A_hat, labels, idx_train, idx_val, model, optimizer)
-    start_time = time.time()  # 记录开始时间
+    start_time = time.time()
 
     acc_test = test(features, A_hat, labels, idx_test, model)
-    end_time  = time.time()  # 记录开始时间
-    execution_time = end_time - start_time  # 计算运行时间
+    end_time  = time.time()
+    execution_time = end_time - start_time
     print(f'execution_time: {execution_time:.4f}')
 
     return acc_test.cpu(), edge_num.cpu(), edge_num.cpu(), model, dense_matrix

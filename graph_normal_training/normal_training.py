@@ -16,33 +16,24 @@ import torch.optim as optim
 from torch_geometric.datasets import Planetoid
 from torch_geometric.utils import to_dense_adj
 
-from mask.add_diagonal_matrix import add_diagonal_and_normalize_edge
+from mask.add_diagonal_matrix import add_diagonal_and_normalize_edge, self_connecting
 import random
 
 from model.GCN import GCN, GCN_one_hop, GCN_three_hop
+from utils import sample_adjacency_matrix
 from utils.train import test, train
 
 
-def graph_normal_training(features,dense_matrix,labels,idx_train,idx_val,idx_test,hidden,dropout,lr,weight_decay,epochs,hops,device):
+def graph_normal_training(features,dense_matrix,labels,idx_train,idx_val,idx_test,hidden,dropout,lr,weight_decay,epochs,network,model,device):
+    if network=='GCN':
+        A_hat = add_diagonal_and_normalize_edge(dense_matrix,device)
 
-    A_hat = add_diagonal_and_normalize_edge(dense_matrix,device)
+    else:
+        A_hat = self_connecting(dense_matrix, device)
+
     edge_num=torch.count_nonzero(dense_matrix)
 
-    if hops==1:
-        model = GCN_one_hop(nfeat=features.shape[1],
-                    nhid=hidden,
-                    nclass=labels.max().item() + 1,
-                    dropout=dropout).to(device)
-    elif hops==2:
-        model = GCN(nfeat=features.shape[1],
-                    nhid=hidden,
-                    nclass=labels.max().item() + 1,
-                    dropout=dropout).to(device)
-    elif hops==3:
-        model = GCN_three_hop(nfeat=features.shape[1],
-                    nhid=hidden,
-                    nclass=labels.max().item() + 1,
-                    dropout=dropout).to(device)
+
     optimizer = optim.Adam(model.parameters(),
                            lr=lr, weight_decay=weight_decay)
 

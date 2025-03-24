@@ -29,8 +29,6 @@ def add_diagonal_and_normalize_edge(edge,device):
     D_inv1 = torch.diag(D1)
     D_inv2 = torch.diag(D2)
 
-
-
     A_hat = torch.mm(torch.mm(D_inv1, result_matrix), D_inv2)
 
     return A_hat

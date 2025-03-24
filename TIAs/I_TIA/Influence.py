@@ -52,18 +52,13 @@ def link_infer_node_implantation_2_hop(algorithm,target_u,regen_matrix, model,fe
 
     else:
 
-        #
         N = regen_matrix.shape[0]
         new_size = N + 1
         new_dense_matrix = torch.zeros((new_size, new_size), device=device)
 
-        #
         new_dense_matrix[:N, :N] = regen_matrix
-
-        #
         adv_idx_u = N
 
-        #
         new_dense_matrix[target_u, adv_idx_u] = 1
         new_dense_matrix[adv_idx_u, target_u] = 1
         model.eval()

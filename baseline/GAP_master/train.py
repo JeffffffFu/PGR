@@ -57,7 +57,7 @@ def run(seed:    Annotated[int,   ArgInfo(help='initial random seed')] = 3407,
     for iteration in range(repeats):
         start_time = time()
         data = Data(**data_initial.to_dict())
-        metrics,preds,model = method.fit(data)  # finding,6  这个出来的就是test的metrics和preds了。
+        metrics,preds,model = method.fit(data)  # finding,6
         end_time = time()
         metrics['duration'] = end_time - start_time
         ### process results ###
@@ -91,7 +91,6 @@ def run(seed:    Annotated[int,   ArgInfo(help='initial random seed')] = 3407,
 
 
 def main():
-    # 这里都是在进行超参数的整理设置
 
     init_parser = ArgumentParser(add_help=False, conflict_handler='resolve')
     method_subparser = init_parser.add_subparsers(dest='method', required=True, title='algorithm to use')
@@ -140,7 +139,6 @@ def main():
 
 def train_with_GAP(dataset,epsilon,hops,device):
 
-    #这里都是在进行超参数的整理设置
 
     init_parser = ArgumentParser(add_help=False, conflict_handler='resolve')
     method_subparser = init_parser.add_subparsers(dest='method', required=True, title='algorithm to use')
@@ -169,7 +167,7 @@ def train_with_GAP(dataset,epsilon,hops,device):
     parser = ArgumentParser(parents=[init_parser], formatter_class=ArgumentDefaultsHelpFormatter)
 
     #change parameters
-    kwargs = vars(parser.parse_args(['gap-inf']))  #一定要献给一个gap-inf的方法，后面再update就可以
+    kwargs = vars(parser.parse_args(['gap-inf']))
     method = 'gap-edp'
     kwargs.update({'method':method, 'dataset':dataset, 'epsilon': epsilon, 'hops': hops, 'device':device})
 
@@ -243,6 +241,4 @@ def GAP_forward_inference(eps,hops,model,data,device):
 #     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 #     train_with_GAP(dataset,epsilon,hops,device)
     # python train.py gap-edp --epsilon 5  --database cora --hops 2   acc: 59.5%
-    # 当前数据集什么的我们都调整好了,GAP需要验证集的，训练集，测试集的分配是： 1:9 ,然后把训练集也当成验证集 generate_boolean_lists2 这个函数
-    # 剩下的只剩在输出的时候拿到预测值即可完成，其他的应该不用改，还有可能需要将松弛DP改成严格的LAP。
-    # 在低eps的时候GPA表现好，如果大的eps应该是LAP表现好
+

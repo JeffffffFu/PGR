@@ -183,7 +183,7 @@ class LoadData:
                 adj = self.lapgraph(adj, eps)
                 self.full_adj_csr_after_dp = adj
             else:
-                print("没有对邻接矩阵加噪")
+                print("no noise")
         _, adj_hat_coo = self.augNormGCN(adj)
         # to torch sparse matrix/pdb
         indices = torch.from_numpy(

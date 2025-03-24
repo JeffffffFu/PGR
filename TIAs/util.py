@@ -89,12 +89,13 @@ def TOP_K_index_to_matrix(matrix, K, test_nodes):
     """"""
     test_nodes = np.array(test_nodes)
     sub_matrix = matrix[np.ix_(test_nodes, test_nodes)]
+    print("sub_matrix:",np.count_nonzero(sub_matrix))
 
     sub_matrix_upper = np.triu(sub_matrix)
     sub_matrix_lower = np.tril(sub_matrix, -1)
     sub_matrix_upper += sub_matrix_lower.T
     sub_matrix = np.triu(sub_matrix_upper)  #
-
+    print("sub_matrix:",np.count_nonzero(sub_matrix))
     upper_triangle_indices = np.triu_indices(sub_matrix.shape[0], k=1)
     upper_triangle_values = sub_matrix[upper_triangle_indices]
 
@@ -428,6 +429,7 @@ def construct_subgraph_for_GAP(sparse_tensor):
 def topology_loss_sim(subgraph_adj, binary_matrix,K,K_hat):
     N=subgraph_adj.shape[0]
     matrix =subgraph_adj+binary_matrix
+
     C=torch.sum(torch.eq(matrix, 2))
     C=C //2
     if C>K or C>K_hat:

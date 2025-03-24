@@ -29,11 +29,11 @@ def based_inf(algorithm, selected_subgraphs, model, priv_adj, features, regen_ed
     #     selected_subgraphs=selected_subgraphs[0]
     tpl_values1 = []
 
-    # 对于每个子图执行攻击并计算 TPL
     for i, (test_nodes, adj_subgraph) in enumerate(selected_subgraphs):
 
         K = torch.count_nonzero(adj_subgraph).item() // 2
         K_hat=k_hat_subgraph(test_nodes, regen_edge)
+
         if algorithm == 'LPGNet':
             origial_logists = model.logist(features, regen_edge, labels).detach()
         elif algorithm == 'PPRL':
@@ -63,15 +63,18 @@ def based_inf(algorithm, selected_subgraphs, model, priv_adj, features, regen_ed
                 new_logists = link_infer_node_implantation_2_hop(algorithm,u, regen_edge, model, features, labels, device)
             elif hops == 3:
                 new_logists = link_infer_node_implantation_3_hop(algorithm,u, regen_edge, model, features, labels, device)
-            grad = new_logists - origial_logists  # 得到输出的差值
+            grad = new_logists - origial_logists
             for j in range(i + 1, len(test_nodes)):
                 v = test_nodes[j]
                 influence_tempo = torch.zeros_like(influence_val)
                 influence_tempo[v][u] = grad[v].norm().item()
                 influence_val = influence_val + influence_tempo
 
+
         attacked_adj = TOP_K_index_to_matrix(influence_val, K_hat,test_nodes)
+
         item1 = topology_loss_sim(adj_subgraph, attacked_adj, K,K_hat)
+
         tpl_values1.append(item1)
 
     tpl_avg1 = sum(tpl_values1) / len(tpl_values1)

@@ -4,9 +4,9 @@ import torch.nn.functional as F
 from model.layers import GraphConvolution
 
 
-class GCN(nn.Module):
+class GNN(nn.Module):
     def __init__(self, nfeat, nhid, nclass, dropout):
-        super(GCN, self).__init__()
+        super(GNN, self).__init__()
 
         self.gc1 = GraphConvolution(nfeat, nhid)
         self.gc2 = GraphConvolution(nhid, nclass)
@@ -26,9 +26,9 @@ class GCN(nn.Module):
         x = self.gc2(x, adj)
         return x
 
-class GCN_three_hop(nn.Module):
+class GNN_three_hop(nn.Module):
     def __init__(self, nfeat, nhid, nclass, dropout):
-        super(GCN_three_hop, self).__init__()
+        super(GNN_three_hop, self).__init__()
 
         self.gc1 = GraphConvolution(nfeat, nhid*2)
         self.gc2 = GraphConvolution(nhid*2, nhid)
@@ -50,10 +50,9 @@ class GCN_three_hop(nn.Module):
         x = F.relu(self.gc2(x, adj))
         x = self.gc3(x, adj)
         return x
-
-class GCN_one_hop(nn.Module):
+class GNN_one_hop(nn.Module):
     def __init__(self, nfeat, nhid, nclass, dropout):
-        super(GCN_one_hop, self).__init__()
+        super(GNN_one_hop, self).__init__()
 
         self.gc1 = GraphConvolution(nfeat, nclass)
         self.dropout = dropout

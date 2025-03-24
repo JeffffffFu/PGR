@@ -19,7 +19,7 @@ def TIA(algorithm, data, model, dense_matrix, features, regen_adj, labels, devic
     if algorithm == 'GAP_PGR':
         rows = dense_matrix.storage.row()
         cols = dense_matrix.storage.col()
-        edges = list(zip(rows.tolist(), cols.tolist()))  # 将行列组合成边的列表
+        edges = list(zip(rows.tolist(), cols.tolist()))
 
         G = nx.Graph()
         G.add_edges_from(edges)

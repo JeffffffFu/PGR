@@ -6,6 +6,7 @@ import torch
 import torch_geometric
 import math
 
+
 from utils.matrix_operation import sparse_mx_to_torch_sparse_tensor
 
 
@@ -127,3 +128,37 @@ def generate_list_C(A, B):
         else:
             C.append(A[0])
     return torch.stack(C)
+
+
+def sample_adjacency_matrix(adj_matrix,device, num_neighbors):
+
+    n = adj_matrix.size(0)
+    sampled_adj_matrix = torch.zeros_like(adj_matrix).to(device)
+    print("adj_matrix:",adj_matrix)
+    for i in range(n):
+        neighbors = torch.nonzero(adj_matrix[i] > 0).squeeze()
+        neighbors = neighbors[neighbors != i]
+
+        if len(neighbors) > num_neighbors:
+            sampled_neighbors = neighbors[torch.randperm(len(neighbors))[:num_neighbors]]
+        else:
+            sampled_neighbors = neighbors
+
+        for j in sampled_neighbors:
+            sampled_adj_matrix[i, j] = 1
+            sampled_adj_matrix[j, i] = 1
+            sampled_adj_matrix[j, j] = 1
+    print("sampled_adj_matrix:",sampled_adj_matrix)
+
+    D1 = torch.sum(sampled_adj_matrix, axis=1)
+    D2 = torch.sum(sampled_adj_matrix, axis=0)
+
+    D1 = D1 ** (-1 / 2)
+    D2 = D2 ** (-1 / 2)
+    D_inv1 = torch.diag(D1)
+    D_inv2 = torch.diag(D2)
+
+    A_hat = torch.mm(torch.mm(D_inv1, sampled_adj_matrix), D_inv2)
+    print("A_hat:",A_hat)
+
+    return A_hat

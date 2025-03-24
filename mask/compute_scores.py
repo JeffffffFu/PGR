@@ -32,7 +32,8 @@ def keep_edges_add_many_edge_from_zero_priD2(meta_grads, last_mask, device, inde
     edge_matrix_vec2 = torch.cat([score.flatten() for score in edge_matrix2])
     torch.cuda.empty_cache()
 
-
+#    min_values, topk_indices = torch.min(scores_vec, dim=0)
+ #   print("min_values:", min_values)
     edge_matrix_vec[indexs] = 1
 
 
@@ -41,6 +42,8 @@ def keep_edges_add_many_edge_from_zero_priD2(meta_grads, last_mask, device, inde
     nonzero_indices = torch.nonzero(edge_matrix_vec).squeeze()
     scores_vec[nonzero_indices] = 100.
     min_values, topk_indices = torch.min(scores_vec, dim=0)
+    print("min_values:", min_values)
+  #  exit()
     edge_matrix_vec2[topk_indices] = 1.0
 
 

@@ -13,7 +13,7 @@ import torch.optim as optim
 
 from baseline.PrivGraph_main import comm
 from baseline.PrivGraph_main.utils import *
-from mask.add_diagonal_matrix import add_diagonal_and_normalize_edge
+from mask.add_diagonal_matrix import add_diagonal_and_normalize_edge, self_connecting
 from model.GCN import GCN
 
 import os
@@ -22,7 +22,6 @@ from utils.compare_adj import compare_adj3
 from utils.train import train, test
 
 
-# 我们做了一个priv_graph在这里，以适应我们的需求
 def main_func(dense_matrix, epsilon):
     # set the ratio of the privacy budget
     e1_r = 1/3
@@ -34,7 +33,7 @@ def main_func(dense_matrix, epsilon):
     # set the resolution parameter
     t = 1.0
     t_begin = time.time()
-    mat0 = dense_matrix.numpy().astype(np.uint8)  # 按照privGraph的格式，需要转成np格式，注意这里没有自连接的
+    mat0 = dense_matrix.numpy().astype(np.uint8)
 
 
 
@@ -139,31 +138,27 @@ def main_func(dense_matrix, epsilon):
 
 
 
-def train_with_privGraph(eps,features, adj, labels, idx_train, idx_val, idx_test, hidden, dropout, lr,weight_decay, epochs, device):
+def train_with_privGraph(eps,features, adj, labels, idx_train, idx_val, idx_test, model, network, lr,weight_decay, epochs, device):
 
 
     dense_matrix=main_func(adj, eps)
 
-
-
-    A_hat = add_diagonal_and_normalize_edge(dense_matrix, device)  # 进行自连接后正则化
+    if network=='GCN':
+        A_hat = add_diagonal_and_normalize_edge(dense_matrix,device)
+    else:
+        A_hat = self_connecting(dense_matrix, device)
     edge_num = torch.count_nonzero(dense_matrix)
-    print("生成后的边数（不包括自连接）:", edge_num)
+    print("edges", edge_num)
 
-    model = GCN(nfeat=features.shape[1],
-                nhid=hidden,
-                nclass=labels.max().item() + 1,
-                dropout=dropout).to(device)
 
     optimizer = optim.Adam(model.parameters(),
                            lr=lr, weight_decay=weight_decay)
 
-    # 正常训练
     train( epochs, features, A_hat, labels, idx_train, idx_val, model, optimizer)
-    start_time = time.time()  # 记录开始时间
+    start_time = time.time()
 
     acc_test = test(features, A_hat, labels, idx_test, model)
-    end_time  = time.time()  # 记录开始时间
-    execution_time = end_time - start_time  # 计算运行时间
+    end_time  = time.time()
+    execution_time = end_time - start_time
     print(f'execution_time: {execution_time:.4f}')
     return acc_test.cpu(), edge_num.cpu(), edge_num.cpu(), model, dense_matrix

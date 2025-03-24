@@ -12,7 +12,6 @@ def compute_matrix_grads(adj, features, labels, model, idx_train, idx_test, devi
     output = model(features, adj)
 
     loss = F.nll_loss(output, labels)
-
     torch.cuda.empty_cache()
 
     matrix_grads = torch.autograd.grad(

@@ -1,6 +1,7 @@
 from __future__ import division
 from __future__ import print_function
 
+import copy
 import math
 import os
 import time
@@ -30,40 +31,31 @@ from utils.utils import replace_elements
 
 
 
-def graph_regenerate_different(algorithm,features,dense_matrix,dense_matrix_DP,labels,idx_train,idx_val,idx_test,hidden,dropout,lr,weight_decay, epochs,epochs_inner,prune,device,mu,preds):
-
+def graph_regenerate_different(algorithm,features,dense_matrix,dense_matrix_DP,labels,idx_train,idx_val,idx_test,lr,weight_decay, epochs,epochs_inner,prune,device,mu,model,network):
 
 
     edge_num=torch.count_nonzero(dense_matrix)
-    A_hat = add_diagonal_and_normalize_edge(dense_matrix_DP,device)
-
+    if network=='GCN':
+        A_hat = add_diagonal_and_normalize_edge(dense_matrix,device)
+    else:
+        A_hat = self_connecting(dense_matrix, device)
     dense_matrix_DP=self_connecting(dense_matrix_DP,device)
     matrix_vec = torch.cat([score.flatten() for score in dense_matrix_DP])
     origin_matrix_vec_non_zero_indices = torch.nonzero(matrix_vec)
 
 
-    model = GCN(nfeat=features.shape[1],
-                nhid=hidden,
-                nclass=labels.max().item() + 1,
-                dropout=dropout).to(device)
+    model1=copy.deepcopy(model)
 
-
-
-    optimizer = optim.Adam(model.parameters(),
+    optimizer = optim.Adam(model1.parameters(),
                            lr=lr, weight_decay=weight_decay)
 
-    train( epochs, features, A_hat, labels, idx_train, idx_val, model, optimizer)
-    test(features, A_hat, labels, idx_test, model)
+    train( epochs, features, A_hat, labels, idx_train, idx_val, model1, optimizer)
+    test(features, A_hat, labels, idx_test, model1)
 
-    output = model(features, A_hat)
+    output = model1(features, A_hat)
     new_label_all = replace_elements(labels, output.max(1)[1], idx_test)
 
-
-    model2 = GCN(nfeat=features.shape[1],
-                nhid=hidden,
-                nclass=labels.max().item() + 1,
-                dropout=dropout).to(device)
-
+    model2=copy.deepcopy(model)
 
     optimizer2 = optim.Adam(model2.parameters(),
                            lr=lr, weight_decay=weight_decay)
@@ -71,8 +63,10 @@ def graph_regenerate_different(algorithm,features,dense_matrix,dense_matrix_DP,l
     num_to_keep = math.ceil(prune*edge_num)
 
     keep_adj=torch.eye(len(labels)).to(device)
-
-    A_hat,_ = normalize_edge(keep_adj,device)
+    if network=='GCN':
+        A_hat,_ = normalize_edge(keep_adj,device)
+    else:
+        A_hat = keep_adj
 
     train( epochs, features, keep_adj, labels, idx_train, idx_val, model2, optimizer2)
     degree_limit_indexs = torch.tensor([], dtype=torch.long).to(device)
@@ -84,20 +78,19 @@ def graph_regenerate_different(algorithm,features,dense_matrix,dense_matrix_DP,l
     for i in range(num_to_keep):
         print(f'Already generated {i} edges, need to generate {num_to_keep-i} edges')
 
-        # 训练
+
         train(epochs_inner, features, A_hat, labels, idx_train, idx_val, model2, optimizer2)
 
         matrix_grads = compute_matrix_grads(A_hat, features, new_label_all, model2, idx_train, idx_test,device)
 
-
         edge_num_gen = 1
-
-
+       # print("matrix_grads:",matrix_grads)
         keep_adj= keep_edges_add_many_edge_from_zero_priD2(matrix_grads, keep_adj, device, edge_num_gen,degree_limit_indexs,origin_matrix_vec_non_zero_indices,matrix_vec,mu)
 
-
-
-        A_hat,D = normalize_edge(keep_adj,device)
+        if network == 'GCN':
+            A_hat, _ = normalize_edge(keep_adj, device)
+        else:
+            A_hat = keep_adj
 
         test(features, A_hat, labels, idx_test, model2)
 

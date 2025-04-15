@@ -89,13 +89,12 @@ def TOP_K_index_to_matrix(matrix, K, test_nodes):
     """"""
     test_nodes = np.array(test_nodes)
     sub_matrix = matrix[np.ix_(test_nodes, test_nodes)]
-    print("sub_matrix:",np.count_nonzero(sub_matrix))
 
     sub_matrix_upper = np.triu(sub_matrix)
     sub_matrix_lower = np.tril(sub_matrix, -1)
     sub_matrix_upper += sub_matrix_lower.T
     sub_matrix = np.triu(sub_matrix_upper)  #
-    print("sub_matrix:",np.count_nonzero(sub_matrix))
+    #print("sub_matrix:",np.count_nonzero(sub_matrix))
     upper_triangle_indices = np.triu_indices(sub_matrix.shape[0], k=1)
     upper_triangle_values = sub_matrix[upper_triangle_indices]
 
@@ -163,7 +162,7 @@ def bfs_dense_subgraph_random(graph, min_nodes, max_nodes, max_subgraphs,seed):
             continue  # ，
 
     if len(subgraphs) < max_subgraphs:
-        raise ValueError("随机生成的子图不足，需调整参数或增加图密度。")
+        raise ValueError("wrong")
 
     result = []
     for idx, subgraph in enumerate(subgraphs):
@@ -238,7 +237,7 @@ def construct_subgraph(data):
     # This returns a dictionary where the key is the node and the value is the community it belongs to
     partition = community_louvain.best_partition(G)
 
-    # Count occurrences of each value  每个社区的节点数
+    # Count occurrences of each value
     value_counts = Counter(partition.values())
 
     # Convert to a dictionary for better readability (optional)
@@ -267,7 +266,7 @@ def construct_subgraph(data):
 
     edges_list = list(subgraph.edges())
 
-    original_size = len(G.nodes())  # 原图大小 (节点数)
+    original_size = len(G.nodes())
 
     full_adj = torch.zeros((original_size, original_size), dtype=torch.float32)
 
@@ -288,7 +287,7 @@ def construct_subgraph_shadow(data,community_id_attack):
     # This returns a dictionary where the key is the node and the value is the community it belongs to
     partition = community_louvain.best_partition(G)
 
-    # Count occurrences of each value  每个社区的节点数
+    # Count occurrences of each value
     value_counts = Counter(partition.values())
 
     # Convert to a dictionary for better readability (optional)
@@ -316,7 +315,7 @@ def construct_subgraph_shadow(data,community_id_attack):
 
     edges_list = list(subgraph.edges())
 
-    original_size = len(G.nodes())  # 原图大小 (节点数)
+    original_size = len(G.nodes())  #
 
     full_adj = torch.zeros((original_size, original_size), dtype=torch.float32)
 
@@ -331,7 +330,7 @@ def construct_subgraph_for_GAP_shadow(sparse_tensor,community_id_attack):
     # Step 1: Convert SparseTensor to networkx graph
     rows = sparse_tensor.storage.row()
     cols = sparse_tensor.storage.col()
-    edges = list(zip(rows.tolist(), cols.tolist()))  # 将行列组合成边的列表
+    edges = list(zip(rows.tolist(), cols.tolist()))
 
     G = nx.Graph()  #
     G.add_edges_from(edges)  #
@@ -367,7 +366,7 @@ def construct_subgraph_for_GAP_shadow(sparse_tensor,community_id_attack):
 
     edges_list = list(subgraph.edges())
 
-    original_size = len(G.nodes())  # 原图大小 (节点数)
+    original_size = len(G.nodes())
 
     full_adj = torch.zeros((original_size, original_size), dtype=torch.float32)
 
@@ -489,13 +488,12 @@ def get_edges(test_node, adj_subgraph):
     exist_edges = []
     nonexist_edges = []
 
-    # 遍历上三角矩阵（只考虑无向图）
     num_nodes = len(test_node)
     for i in range(num_nodes):
         for j in range(i + 1, num_nodes):
-            if adj_subgraph[i, j] == 1:  # 如果(i, j)之间有边
+            if adj_subgraph[i, j] == 1:
                 exist_edges.append((test_node[i], test_node[j]))
-            else:  # 如果(i, j)之间没有边
+            else:
                 nonexist_edges.append((test_node[i], test_node[j]))
 
     return exist_edges, nonexist_edges

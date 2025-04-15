@@ -130,35 +130,25 @@ def generate_list_C(A, B):
     return torch.stack(C)
 
 
-def sample_adjacency_matrix(adj_matrix,device, num_neighbors):
+import torch
 
-    n = adj_matrix.size(0)
-    sampled_adj_matrix = torch.zeros_like(adj_matrix).to(device)
-    print("adj_matrix:",adj_matrix)
-    for i in range(n):
-        neighbors = torch.nonzero(adj_matrix[i] > 0).squeeze()
-        neighbors = neighbors[neighbors != i]
 
-        if len(neighbors) > num_neighbors:
-            sampled_neighbors = neighbors[torch.randperm(len(neighbors))[:num_neighbors]]
-        else:
-            sampled_neighbors = neighbors
+def sample_neighbors(adj: torch.Tensor) -> torch.Tensor:
+    adj_detached = adj.detach()
 
-        for j in sampled_neighbors:
-            sampled_adj_matrix[i, j] = 1
-            sampled_adj_matrix[j, i] = 1
-            sampled_adj_matrix[j, j] = 1
-    print("sampled_adj_matrix:",sampled_adj_matrix)
+    N = adj_detached.size(0)
+    k = 150 if N in (2708, 3327) else 448
 
-    D1 = torch.sum(sampled_adj_matrix, axis=1)
-    D2 = torch.sum(sampled_adj_matrix, axis=0)
+    rand_values = torch.rand(N, adj_detached.size(1), device=adj_detached.device)
+    rand_values[adj_detached <= 0] = float('inf')
 
-    D1 = D1 ** (-1 / 2)
-    D2 = D2 ** (-1 / 2)
-    D_inv1 = torch.diag(D1)
-    D_inv2 = torch.diag(D2)
+    _, selected = torch.topk(-rand_values, k, dim=1)
 
-    A_hat = torch.mm(torch.mm(D_inv1, sampled_adj_matrix), D_inv2)
-    print("A_hat:",A_hat)
+    mask = torch.zeros_like(adj_detached)
+    mask.scatter_(1, selected, 1)
 
-    return A_hat
+
+    sampled_adj = adj * mask.to(adj.dtype)
+
+    return sampled_adj
+

@@ -20,11 +20,12 @@ from mask.add_diagonal_matrix import add_diagonal_and_normalize_edge, self_conne
 import random
 
 from model.GCN import GCN, GCN_one_hop, GCN_three_hop
-from utils import sample_adjacency_matrix
+from utils import sample_neighbors
 from utils.train import test, train
 
 
 def graph_normal_training(features,dense_matrix,labels,idx_train,idx_val,idx_test,hidden,dropout,lr,weight_decay,epochs,network,model,device):
+
     if network=='GCN':
         A_hat = add_diagonal_and_normalize_edge(dense_matrix,device)
 

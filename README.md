@@ -1,8 +1,8 @@
 # PGR
 
 
-This repository is the official implementation of the paper:
-
+This repository is the official implementation of the paper: 
+#### Safeguarding Graph Neural Networks against Topology Inference Attacks
 
 
 ## Installation
@@ -13,7 +13,7 @@ pip install -r requirements.txt
 ```
 
 
-You can run the PGR directly with the following default parameters:
+You can run the PGR directly with the following default parameters on GCN model:
 
 ```bash
 python main.py --algorithm PGR --dataset cora --prune 0.5 --mu 0.0 --epochs_inner 1 
@@ -23,19 +23,22 @@ python main.py --algorithm PGR --dataset duke --prune 0.05 --mu 0.0 --epochs_inn
 python main.py --algorithm PGR --dataset emory --prune 0.05 --mu 0.0 --epochs_inner 1 
 ```
 
-For GAT model:
+For GAT model and GraphSAGE model:
 
 ```bash
 python main.py --algorithm PGR --dataset cora --prune 0.2 --mu 0.0 --epochs_inner 1 --network GAT
 python main.py --algorithm PGR --dataset citeseer --prune 0.2 --mu 0.0 --epochs_inner 1 --network GAT
-python main.py --algorithm PGR --dataset emory --prune 0.06 --mu 0.0 --epochs_inner 1 --network GAT
+python main.py --algorithm PGR --dataset emory --prune 0.05 --mu 0.0 --epochs_inner 1 -- epochs 200 --network GAT
+python main.py --algorithm PGR --dataset cora --prune 0.2 --mu 0.0 --epochs_inner 1 --network GraphSAGE
+python main.py --algorithm PGR --dataset citeseer --prune 0.2 --mu 0.0 --epochs_inner 1 --network GraphSAGE
+python main.py --algorithm PGR --dataset emory --prune 0.05 --mu 0.0 --epochs_inner 1 --network GraphSAGE
 ```
 
 You can run the Original model (no dp) directly with the following default parameters:
 
 ```bash
 python main.py --algorithm Original --dataset cora 
-python main.py --algorithm Original--dataset citeseer 
+python main.py --algorithm Original --dataset citeseer 
 python main.py --algorithm Original --dataset lastfm 
 python main.py --algorithm Original --dataset duke 
 python main.py --algorithm Original --dataset emory  

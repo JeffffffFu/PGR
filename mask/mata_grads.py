@@ -7,7 +7,7 @@ import torch.nn.functional as F
 def compute_matrix_grads(adj, features, labels, model, idx_train, idx_test, device):
     adj = torch.tensor(adj, requires_grad=True).to(device)
 
-    torch.cuda.empty_cache()
+  #  torch.cuda.empty_cache()
 
     output = model(features, adj)
 

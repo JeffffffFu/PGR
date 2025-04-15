@@ -6,10 +6,6 @@ from math import ceil
 from typing import Callable, Iterable, List, Optional, Union
 import random
 
-
-
-
-
 def keep_edges_add_many_edge_from_zero_priD2(meta_grads, last_mask, device, indexs,edge_num_gen,
                                                      origin_matrix_vec_non_zero_indices,matrix_vec,pri_d):
     meta_grads = meta_grads.to(device)
@@ -43,7 +39,6 @@ def keep_edges_add_many_edge_from_zero_priD2(meta_grads, last_mask, device, inde
     scores_vec[nonzero_indices] = 100.
     min_values, topk_indices = torch.min(scores_vec, dim=0)
     print("min_values:", min_values)
-  #  exit()
     edge_matrix_vec2[topk_indices] = 1.0
 
 

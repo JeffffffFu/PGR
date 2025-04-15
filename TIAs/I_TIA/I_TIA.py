@@ -28,18 +28,16 @@ def based_inf(algorithm, selected_subgraphs, model, priv_adj, features, regen_ed
     # if algorithm =='LPGNet':
     #     selected_subgraphs=selected_subgraphs[0]
     tpl_values1 = []
+    A_hat = add_diagonal_and_normalize_edge(regen_edge, device)
 
     for i, (test_nodes, adj_subgraph) in enumerate(selected_subgraphs):
 
         K = torch.count_nonzero(adj_subgraph).item() // 2
-        K_hat=k_hat_subgraph(test_nodes, regen_edge)
+     #   K_hat=k_hat_subgraph(test_nodes, regen_edge)
 
         if algorithm == 'LPGNet':
             origial_logists = model.logist(features, regen_edge, labels).detach()
-        elif algorithm == 'PPRL':
-            origial_logists = model.logist(features, regen_edge).detach()
         elif algorithm == 'privGraph':
-            A_hat = add_diagonal_and_normalize_edge(regen_edge, device)
             origial_logists = model.logist(features, A_hat).detach()
         else:
             origial_logists = model.logist(features, regen_edge).detach()
@@ -71,9 +69,9 @@ def based_inf(algorithm, selected_subgraphs, model, priv_adj, features, regen_ed
                 influence_val = influence_val + influence_tempo
 
 
-        attacked_adj = TOP_K_index_to_matrix(influence_val, K_hat,test_nodes)
+        attacked_adj = TOP_K_index_to_matrix(influence_val, K,test_nodes)
 
-        item1 = topology_loss_sim(adj_subgraph, attacked_adj, K,K_hat)
+        item1 = topology_loss_sim(adj_subgraph, attacked_adj, K,K)
 
         tpl_values1.append(item1)
 
@@ -129,7 +127,6 @@ def based_inf_PGR(algorithm,selected_subgraphs, model, priv_adj, features, regen
     for i, (test_nodes, adj_subgraph) in enumerate(selected_subgraphs):
 
         K = torch.count_nonzero(adj_subgraph).item() // 2
-        K_hat=k_hat_subgraph(test_nodes, regen_edge)
 
         origial_logists = model.logist(features, regen_edge).detach()
 
@@ -157,9 +154,9 @@ def based_inf_PGR(algorithm,selected_subgraphs, model, priv_adj, features, regen
                 influence_tempo[v][u] = grad[v].norm().item()
                 influence_val = influence_val + influence_tempo
 
-        attacked_adj = TOP_K_index_to_matrix_PGR(influence_val, K_hat,regen_edge,test_nodes)
+        attacked_adj = TOP_K_index_to_matrix_PGR(influence_val, K,regen_edge,test_nodes)
 
-        TPL = topology_loss_sim_PGR(adj_subgraph, attacked_adj, K,K_hat,test_nodes)
+        TPL = topology_loss_sim_PGR(adj_subgraph, attacked_adj, K,K,test_nodes)
         tpl_values1.append(TPL)
 
 
@@ -176,18 +173,14 @@ def based_inf_GAP(selected_subgraphs,model, features, labels, adj_t, eps, hops, 
     model = model.to(device)
     features = features.to(device)
 
-    # 初始化 TPL 值存储列表
     tpl_values1 = []
     tpl_values2 = []
 
-    # 对每个子图执行攻击并计算 TPL
     for i, (test_nodes, adj_subgraph) in tqdm(enumerate(selected_subgraphs)):
 
-        # 计算 K 和 K_hat
         K = torch.count_nonzero(adj_subgraph).item() // 2
         K_hat = K
 
-        # 初始化编码器
         Encoder = EncoderModule(
             num_classes=labels.max().item() + 1,
             hidden_dim=16,
@@ -199,42 +192,35 @@ def based_inf_GAP(selected_subgraphs,model, features, labels, adj_t, eps, hops, 
             batch_norm=True,
         )
 
-        # 编码并进行聚合
         encoded_features = Encoder.predict2(features.cpu())
         encoded_features = compute_aggregations_dp(eps, hops, encoded_features, adj_t)
         encoded_features = encoded_features.to(device)
 
-        # 初始化影响值矩阵
         influence_val = torch.zeros((len(labels), len(labels)))
 
-        # 计算原始后验概率
         origial_logists = model.logist(encoded_features).detach()
         origial_logists = torch.cat(
             (origial_logists, torch.zeros(1, origial_logists.shape[1]).to(origial_logists.device)), dim=0
         )
         test_nodes.sort(reverse=False)
 
-        # 逐个节点进行攻击并计算影响
         for i in tqdm(range(len(test_nodes))):
             u = test_nodes[i]
             new_logists = link_infer_node_implantation_2_hop_GAP(u, adj_t, model, features, labels, eps, hops, device)
-            grad = new_logists - origial_logists  # 得到输出的差异
+            grad = new_logists - origial_logists
             for j in range(len(test_nodes)):
                 v = test_nodes[j]
                 influence_tempo = torch.zeros_like(influence_val)
                 influence_tempo[v][u] = grad[v].norm().item()
                 influence_val += influence_tempo
 
-        # 生成攻击后的邻接矩阵
         attacked_adj = TOP_K_index_to_matrix(influence_val, K,test_nodes)
         #  K_hat = torch.count_nonzero(torch.tensor(attacked_adj)).item() // 2
 
-        # 计算当前子图的 TPL
         item1= topology_loss_sim(adj_subgraph, attacked_adj, K, K_hat)
         tpl_values1.append(item1)
 
 
-    # 计算所有子图的 TPL 平均值
     tpl_avg1 = sum(tpl_values1) / len(tpl_values1)
 
     print(f"I_MIA_GAP done: {tpl_avg1}")
@@ -251,11 +237,9 @@ def LIA_based_inf(algorithm, selected_subgraphs, model, priv_adj, features, rege
 
     A_hat = add_diagonal_and_normalize_edge(regen_edge, device)
 
-    # 对于每个子图执行攻击并计算 TPL
     for i, (test_nodes, adj_subgraph) in enumerate(selected_subgraphs):
-        print(f"正在攻击第 {i + 1} 个子图")
+        print(f"attack {i + 1} subgraph")
 
-        # 计算 original_logists，根据算法选择不同的 logits 计算方式
         if algorithm == 'LPGNet':
             origial_logists = model.logist(features, regen_edge, labels).detach()
         elif algorithm == 'PPRL':
@@ -267,7 +251,6 @@ def LIA_based_inf(algorithm, selected_subgraphs, model, priv_adj, features, rege
 
         influence_val = torch.zeros((N, N))
 
-        # 对每个节点 u 进行攻击并计算影响力
         for u in tqdm(test_nodes):
             pert = torch.zeros_like(features)
             pert[u] = features[u] * 0.1
@@ -278,7 +261,7 @@ def LIA_based_inf(algorithm, selected_subgraphs, model, priv_adj, features, rege
                 new_logists = model.logist(features + pert, A_hat).detach()
             else:
                 new_logists = model.logist(features + pert, regen_edge).detach()
-            grad = new_logists - origial_logists  # 得到输出的差值
+            grad = new_logists - origial_logists
             for v in test_nodes:
                 if v > u:
                     influence_tempo = torch.zeros_like(influence_val)
@@ -295,12 +278,11 @@ def LIA_based_inf(algorithm, selected_subgraphs, model, priv_adj, features, rege
         F1 = 2 * precision * recall / (precision + recall + 0.0001)
         F1_values.append(F1)
 
-        print(f"当前子图的 F1 值: {F1}")
+        print(f" F1 value: {F1}")
 
 
-    # 计算所有子图的 TPL 平均值
     F1_avg = sum(F1_values) / len(F1_values)
-    print(f"LIA_based_inf最终的 F1_avg : {F1_avg}")
+    print(f"LIA_based_inf F1_avg : {F1_avg}")
 #
     return F1_avg
 
@@ -308,19 +290,16 @@ def LIA_based_inf(algorithm, selected_subgraphs, model, priv_adj, features, rege
 
 
 def LIA_based_inf_GAP(selected_subgraphs,model, features, labels, adj_t, eps, hops, device, seed):
-    print("开始进行 topology_audit_based_inf_GAP -------------------------")
+    print("topology_audit_based_inf_GAP -------------------------")
     model = model.to(device)
     features = features.to(device)
 
-    # 初始化 TPL 值存储列表
     F1_values = []
 
-    # 对每个子图执行攻击并计算 TPL
     for i, (test_nodes, adj_subgraph) in enumerate(selected_subgraphs):
-        print(f"正在攻击第 {i + 1} 个子图")
+        print(f"attack{i + 1} subgraph")
 
 
-        # 初始化编码器
         Encoder = EncoderModule(
             num_classes=labels.max().item() + 1,
             hidden_dim=16,
@@ -332,31 +311,26 @@ def LIA_based_inf_GAP(selected_subgraphs,model, features, labels, adj_t, eps, ho
             batch_norm=True,
         )
 
-        # 编码并进行聚合
         encoded_features = Encoder.predict2(features.cpu())
         encoded_features = compute_aggregations_dp(eps, hops, encoded_features, adj_t)
         encoded_features = encoded_features.to(device)
 
-        # 初始化影响值矩阵
         influence_val = torch.zeros((len(labels), len(labels)))
 
-        # 计算原始后验概率
         origial_logists = model.logist(encoded_features).detach()
         origial_logists = torch.cat(
             (origial_logists, torch.zeros(1, origial_logists.shape[1]).to(origial_logists.device)), dim=0
         )
 
-        # 逐个节点进行攻击并计算影响
         for u in tqdm(test_nodes):
             new_logists = link_infer_node_implantation_2_hop_GAP(u, adj_t, model, features, labels, eps, hops, device)
-            grad = new_logists - origial_logists  # 得到输出的差异
+            grad = new_logists - origial_logists
             for v in test_nodes:
                 if v > u:
                     influence_tempo = torch.zeros_like(influence_val)
                     influence_tempo[v][u] = grad[v].norm().item()
                     influence_val += influence_tempo
 
-        # 生成攻击后的邻接矩阵
         attacked_adj = cluster_matrix(influence_val)
         matrix = adj_subgraph + attacked_adj
         C = torch.sum(torch.eq(matrix, 2))
@@ -366,9 +340,8 @@ def LIA_based_inf_GAP(selected_subgraphs,model, features, labels, adj_t, eps, ho
         F1 = 2 * precision * recall / (precision + recall)
         F1_values.append(F1)
 
-        print(f"当前子图的 F1 值: {F1}")
-    # 计算所有子图的 TPL 平均值
+        print(f"F1 value: {F1}")
     F1_avg = sum(F1_values) / len(F1_values)
-    print(f"topology_audit_based_inf最终的 F1_avg : {F1_avg}")
+    print(f"topology_audit_based_inf F1_avg : {F1_avg}")
 
     return F1_avg

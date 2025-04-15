@@ -27,7 +27,7 @@ from data.dataload import load_data
 from graph_normal_training.normal_training import graph_normal_training
 from graph_reconstruction.graph_regenerate import graph_regenerate_different
 
-from utils.utils import split_dataset, BinaryMask_to_ListMask, generate_list_C, replace_elements
+from utils.utils import split_dataset
 
 
 def main():
@@ -51,12 +51,12 @@ def main():
                         help='Number of hidden units.')
     parser.add_argument('--dropout', type=float, default=0.2,
                         help='units dropout')
-    parser.add_argument('--prune', type=float, default=0.1,
+    parser.add_argument('--prune', type=float, default=0.5,
                         help='how many need to keep')
     parser.add_argument('--ratio_of_train_set', type=float, default='0.1')
     parser.add_argument('--mu', type=float, default='0.0')
     parser.add_argument('--attacks', type=str, default='None',choices=['None','TIA','TIA-PGR'])
-    parser.add_argument('--network', type=str, default='GCN',choices=['GCN','GNN','GAT'])
+    parser.add_argument('--network', type=str, default='GCN',choices=['GCN','GAT','GraphSAGE'])
     parser.add_argument('--hops', type=int, default=2)
     parser.add_argument('--eps', type=float, default=7)
 
@@ -73,6 +73,7 @@ def main():
     dropout=args.dropout
     lr=args.lr
     epochs=args.epochs
+
     epochs_inner=args.epochs_inner
     weight_decay=args.weight_decay
     prune=args.prune
@@ -81,7 +82,6 @@ def main():
     hops=args.hops
     eps=args.eps
     network=args.network
-
     dataset=load_data(dataset_name)
     data = dataset[0]
     dense_matrix = torch_geometric.utils.to_dense_adj(data.edge_index)[0]
@@ -147,6 +147,19 @@ def main():
         raise ValueError("this algorithm is not exist")
 
     print(f'{attack}|{network}|{algorithm}|{dataset_name}|test_acc:{acc_test}')
+    pd.DataFrame([acc_test]).to_csv(
+        f"TPL_result_baseline/{attack}_{network}_{algorithm}_{dataset_name}_{eps}_acc.csv",
+        index=False, header=False)
+    if algorithm == 'PGR':
+        File_Path_Csv = os.getcwd() + f"/result_PGR/{network}/{algorithm}/{dataset_name}/{prune}/{mu}/{epochs_inner}/{hops}//"
+        if not os.path.exists(File_Path_Csv):
+            os.makedirs(File_Path_Csv)
+        pd.DataFrame([acc_test,num_priv_edges,num_rengen_edges]).to_csv(f"{File_Path_Csv}/acc.csv",index=False, header=False)
+        torch.save(regen_adj, f"{File_Path_Csv}/regen_edge.pth")
+        torch.save(model.state_dict(), f'{File_Path_Csv}/model.pt')
+        torch.save(labels, f'{File_Path_Csv}/labels.pth')
+        torch.save(features, f'{File_Path_Csv}/features.pth')
+        torch.save(device, f'{File_Path_Csv}/device.pth')
 
     if attack=='TIA':
         if algorithm == 'GAP':
@@ -154,9 +167,17 @@ def main():
         else:
 
             TPL_M,TPL_C, TPL_I = TIA(algorithm, data, model, dense_matrix, features,regen_adj,labels, device,hops, seed)
-
+        pd.DataFrame([TPL_M, TPL_C, TPL_I]).to_csv(
+            f"TPL_result_baseline/{attack}_{network}_{algorithm}_{dataset_name}_{eps}.csv",
+            index=False, header=False)
         print(f'{attack}|{network}|{algorithm}|{dataset_name}|{TPL_M}|{TPL_C}|{TPL_I}')
 
+        if algorithm == 'PGR':
+            TPL_M, TPL_C, TPL_I = TIA_PGR(algorithm,data, model, dense_matrix, features, regen_adj, labels, device, hops, seed)
+            pd.DataFrame([TPL_M, TPL_C, TPL_I]).to_csv(
+                f"TPL_result_TIA-PGR/_{attack}_{network}_{algorithm}_{dataset_name}_{eps}.csv",
+                index=False, header=False)
+            print(f'{attack}|{network}|{algorithm}|{dataset_name}|{TPL_M}|{TPL_C}|{TPL_I}')
 
     if attack=='TIA-PGR':
 

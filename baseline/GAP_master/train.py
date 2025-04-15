@@ -86,7 +86,6 @@ def run(seed:    Annotated[int,   ArgInfo(help='initial random seed')] = 3407,
         logger.log_summary(summary)
 
     logger.finish()
-    print()
     return run_metrics["test/acc"][-1],preds,data_initial,model
 
 

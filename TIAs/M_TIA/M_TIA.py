@@ -24,7 +24,7 @@ def based_metric(algorithm, selected_subgraphs, model, priv_adj, features, regen
 
     for i, (test_nodes, adj_subgraph) in enumerate(selected_subgraphs):
         K = torch.count_nonzero(adj_subgraph).item() // 2
-        K_hat=k_hat_subgraph(test_nodes, regen_edge)  # regen_edge is the G_hat
+     #   K_hat=k_hat_subgraph(test_nodes, regen_edge)  # regen_edge is the G_hat
 
         if algorithm == 'LPGNet':
             posterior = model.logist(features, regen_edge, labels).detach().cpu().numpy()
@@ -44,9 +44,8 @@ def based_metric(algorithm, selected_subgraphs, model, priv_adj, features, regen
                     v = test_nodes[j]
                     dist[u][v] = torch.tensor(similarity(posterior[u], posterior[v]), dtype=torch.float32)
 
-            binary_matrix = TOP_K_index_to_matrix(dist, K_hat,test_nodes)
-            K_hat = torch.count_nonzero(torch.tensor(binary_matrix)).item() // 2
-            item1= topology_loss_sim(adj_subgraph, binary_matrix, K, K_hat)
+            binary_matrix = TOP_K_index_to_matrix(dist, K,test_nodes)
+            item1= topology_loss_sim(adj_subgraph, binary_matrix, K, K)
             TPL_list.append(item1)
 
         tpl_values1.append(max(TPL_list))
@@ -74,7 +73,7 @@ def based_metric_PGR(algorithm, selected_subgraphs, model, priv_adj, features, r
 
         K = torch.count_nonzero(adj_subgraph).item()
         K = int(K / 2)
-        K_hat=k_hat_subgraph(test_nodes, regen_edge)
+     #   K_hat=k_hat_subgraph(test_nodes, regen_edge)
 
         if algorithm == 'LPGNet':
             posterior = model.logist(features, regen_edge, labels).detach().cpu().numpy()
@@ -94,10 +93,10 @@ def based_metric_PGR(algorithm, selected_subgraphs, model, priv_adj, features, r
                     v = test_nodes[j]
                     dist[u][v] = torch.tensor(similarity(posterior[u], posterior[v]), dtype=torch.float32)
 
-            binary_matrix = TOP_K_index_to_matrix_PGR(dist, K_hat,regen_edge,test_nodes)
+            binary_matrix = TOP_K_index_to_matrix_PGR(dist, K,regen_edge,test_nodes)
 
 
-            item1= topology_loss_sim_PGR(adj_subgraph, binary_matrix, K, K_hat,test_nodes)
+            item1= topology_loss_sim_PGR(adj_subgraph, binary_matrix, K, K,test_nodes)
             TPL_list.append(item1)
         tpl_values1.append(max(TPL_list))
 

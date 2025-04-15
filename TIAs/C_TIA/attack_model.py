@@ -45,20 +45,99 @@ class MLP2Layer(nn.Module):
     def train_one_epoch(self, Xtrain, ytrain):
         self.train()
         self.optimizer.zero_grad()
+        if len(ytrain) < 45000:
+
+            outputs = self(torch.Tensor(Xtrain).to(self.device))
+            ytrain = torch.tensor([ytrain])
+            ytrain = ytrain.squeeze().long().to(self.device)
+
+            loss = self.criterion(outputs, ytrain)
+
+            loss.backward()
+            self.optimizer.step()
+        else:  # for large-graph
+            outputs = self(torch.Tensor(Xtrain).to(self.device))
+            ytrain = torch.tensor([ytrain])
+            ytrain = ytrain.squeeze().long().to(self.device)
+
+            pos_mask = (ytrain == 1)
+            pos_outputs = outputs[pos_mask]
+            pos_labels = ytrain[pos_mask]
+
+            neg_mask = (ytrain == 0)
+            neg_outputs = outputs[neg_mask]
+            neg_labels = ytrain[neg_mask]
+
+            num_pos = len(pos_outputs) * 2
+            rand_indices = torch.randperm(len(neg_outputs))[:num_pos]
+            selected_neg_outputs = neg_outputs[rand_indices]
+            selected_neg_labels = neg_labels[rand_indices]
+
+            balanced_outputs = torch.cat([pos_outputs, selected_neg_outputs], dim=0)
+            balanced_labels = torch.cat([pos_labels, selected_neg_labels], dim=0)
+
+            loss = self.criterion(balanced_outputs, balanced_labels)
+
+            loss.backward()
+            self.optimizer.step()
+
+
+    def train_one_epoch2(self, Xtrain, ytrain): #For Full graph
+        self.train()
+        self.optimizer.zero_grad()
         outputs = self(torch.Tensor(Xtrain).to(self.device))
         ytrain = torch.tensor([ytrain])
         ytrain = ytrain.squeeze().long().to(self.device)
-        loss = self.criterion(outputs, ytrain)
+
+        pos_mask = (ytrain == 1)
+        pos_outputs = outputs[pos_mask]
+        pos_labels = ytrain[pos_mask]
+
+        neg_mask = (ytrain == 0)
+        neg_outputs = outputs[neg_mask]
+        neg_labels = ytrain[neg_mask]
+
+        if len(neg_outputs)<len(pos_outputs)*2:
+            selected_neg_outputs=neg_outputs
+            selected_neg_labels=neg_labels
+        else:
+            num_pos = round(len(pos_outputs)*2)
+            rand_indices = torch.randperm(len(neg_outputs))[:num_pos]
+            selected_neg_outputs = neg_outputs[rand_indices]
+            selected_neg_labels = neg_labels[rand_indices]
+
+        balanced_outputs = torch.cat([pos_outputs, selected_neg_outputs], dim=0)
+        balanced_labels = torch.cat([pos_labels, selected_neg_labels], dim=0)
+
+        loss = self.criterion(balanced_outputs, balanced_labels)
+
         loss.backward()
         self.optimizer.step()
-
     def loss_acc(self, Xtest, ytest):
         self.eval()
         ytest = torch.tensor([ytest])
         ytest = ytest.squeeze().long().to(self.device)
         outputs = self(torch.Tensor(Xtest).to(self.device))
-        loss = self.criterion(outputs, ytest)
-        acc = (outputs.argmax(dim=1) == ytest).sum() / len(outputs)
+
+
+        pos_mask = (ytest == 1)
+        pos_outputs = outputs[pos_mask]
+        pos_labels = ytest[pos_mask]
+
+        neg_mask = (ytest == 0)
+        neg_outputs = outputs[neg_mask]
+        neg_labels = ytest[neg_mask]
+        num_pos = len(pos_outputs) * 2
+        rand_indices = torch.randperm(len(neg_outputs))[:num_pos]
+        selected_neg_outputs = neg_outputs[rand_indices]
+        selected_neg_labels = neg_labels[rand_indices]
+
+        balanced_outputs = torch.cat([pos_outputs, selected_neg_outputs], dim=0)
+        balanced_labels = torch.cat([pos_labels, selected_neg_labels], dim=0)
+
+        loss = self.criterion(balanced_outputs, balanced_labels)
+
+        acc = (balanced_outputs.argmax(dim=1) == balanced_labels).sum() / len(balanced_outputs)
 
         return loss.cpu().detach().item(), acc.cpu().detach().item()
 
@@ -287,8 +366,7 @@ def train_model(model, train_x, train_y, max_patient=20, display=-1):
     opt_loss = 1e10
     patient = max_patient
     for i in pbar:
-        model.train_one_epoch(train_x, train_y)
-        train_loss, train_acc = model.loss_acc(train_x, train_y)
+        model.train_one_epoch2(train_x, train_y)
 
     return model
 

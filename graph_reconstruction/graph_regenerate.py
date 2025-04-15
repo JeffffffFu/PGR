@@ -26,15 +26,14 @@ import random
 from model.GCN import GCN, GCN_one_hop, GCN_three_hop
 from utils.matrix_operation import normalize_edge
 from utils.train import train, test
-from utils.utils import replace_elements
-
-
+from utils.utils import replace_elements, sample_neighbors
 
 
 def graph_regenerate_different(algorithm,features,dense_matrix,dense_matrix_DP,labels,idx_train,idx_val,idx_test,lr,weight_decay, epochs,epochs_inner,prune,device,mu,model,network):
 
 
     edge_num=torch.count_nonzero(dense_matrix)
+
     if network=='GCN':
         A_hat = add_diagonal_and_normalize_edge(dense_matrix,device)
     else:

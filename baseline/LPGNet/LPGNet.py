@@ -182,6 +182,16 @@ def LPGNet(data,eps,idx_train,idx_val,idx_test):
         default=eps,
         help="The privacy budget. If 0, then do not DP train the arch",
     )
+
+    parser.add_argument(
+        "--network",
+        type=str,
+        default='GCN',
+        help="network",
+    )
+
+
+
     parser.add_argument(
         "--w_dp",
         default=MyGlobals.with_dp,

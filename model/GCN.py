@@ -21,10 +21,12 @@ class GCN(nn.Module):
 
 
     def logist(self,x,adj):
-        x=self.gc1(x,adj)
-        x=F.relu(x)
+        x = F.relu(self.gc1(x, adj))
+        x = F.dropout(x, self.dropout, training=self.training)
         x = self.gc2(x, adj)
-        return x
+        return F.log_softmax(x, dim=1)
+
+
 
 class GCN_three_hop(nn.Module):
     def __init__(self, nfeat, nhid, nclass, dropout):
@@ -47,9 +49,11 @@ class GCN_three_hop(nn.Module):
 
     def logist(self, x, adj):
         x = F.relu(self.gc1(x, adj))
+        x = F.dropout(x, self.dropout, training=self.training)
         x = F.relu(self.gc2(x, adj))
+        x = F.dropout(x, self.dropout, training=self.training)
         x = self.gc3(x, adj)
-        return x
+        return F.log_softmax(x, dim=1)
 
 class GCN_one_hop(nn.Module):
     def __init__(self, nfeat, nhid, nclass, dropout):

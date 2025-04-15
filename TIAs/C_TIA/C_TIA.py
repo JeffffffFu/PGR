@@ -58,7 +58,7 @@ def based_classifier(algorithm, selected_subgraphs, model, priv_adj, features, r
     for i, (test_nodes, adj_subgraph) in enumerate(test_subgraphs):
 
         K = torch.count_nonzero(adj_subgraph).item() // 2
-        K_hat=k_hat_subgraph(test_nodes, regen_edge) ## regen_edge is the G_hat
+       # K_hat=k_hat_subgraph(test_nodes, regen_edge) ## regen_edge is the G_hat
 
         mia_test_feature = []
         mia_test_label = []
@@ -74,7 +74,7 @@ def based_classifier(algorithm, selected_subgraphs, model, priv_adj, features, r
 
 
         P=attack_model_inference(attack_model, mia_test_feature,device)
-        TPL=topk_confidence_to_TPL(P, mia_test_label, K, K_hat, device)
+        TPL=topk_confidence_to_TPL(P, mia_test_label, K, K, device)
         tpl_values1.append(TPL)
 
     tpl_avg1 = sum(tpl_values1) / len(tpl_values1)
@@ -125,7 +125,7 @@ def based_classifier_PGR(algorithm, selected_subgraphs, model, priv_adj, feature
     for i, (test_nodes, adj_subgraph) in enumerate(test_subgraphs):
 
         K = torch.count_nonzero(adj_subgraph).item() // 2
-        K_hat=k_hat_subgraph(test_nodes, regen_edge)
+       # K_hat=k_hat_subgraph(test_nodes, regen_edge)
 
         mia_test_feature = []
         mia_test_label = []
@@ -142,7 +142,7 @@ def based_classifier_PGR(algorithm, selected_subgraphs, model, priv_adj, feature
                 Knowledge.append([regen_edge[u][v]])
 
         P=attack_model_inference(attack_model, mia_test_feature, device)
-        TPL=topk_confidence_to_TPL_PGR(P, mia_test_label, K, K_hat, device,Knowledge,test_nodes)
+        TPL=topk_confidence_to_TPL_PGR(P, mia_test_label, K, K, device,Knowledge,test_nodes)
         tpl_values1.append(TPL)
 
     tpl_avg1 = sum(tpl_values1) / len(tpl_values1)
@@ -157,7 +157,7 @@ def based_classifier_GAP(selected_subgraphs,model,features,labels,adj_t,eps,hops
     model = model.to(device)
     features = features.to(device)
 
-    train_subgraph = selected_subgraphs[0]
+    train_subgraph = selected_subgraphs[-1]
     test_subgraphs = selected_subgraphs[0:]
 
     test_nodes_shadow, adj_subgraph_shadow = train_subgraph
@@ -228,7 +228,6 @@ def LIA_based_classifier(algorithm, selected_subgraphs, model, priv_adj, feature
     model = model.to(device)
     regen_edge = regen_edge.to(device)
     features = features.to(device)
-
     train_subgraph = selected_subgraphs[-1]
     test_subgraphs = selected_subgraphs[0:]
 
@@ -290,7 +289,7 @@ def LIA_based_classifier_GAP(selected_subgraphs,model,features,labels,adj_t,eps,
     model = model.to(device)
     features = features.to(device)
 
-    train_subgraph = selected_subgraphs[0]
+    train_subgraph = selected_subgraphs[-1]
     test_subgraphs = selected_subgraphs[0:]
 
     test_nodes_shadow, adj_subgraph_shadow = train_subgraph

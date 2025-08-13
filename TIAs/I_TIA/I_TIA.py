@@ -5,8 +5,6 @@ from tqdm import tqdm
 
 from TIAs.I_TIA.Influence import link_infer_node_implantation_2_hop, link_infer_1_hop, \
     link_infer_node_implantation_3_hop, link_infer_node_implantation_2_hop_GAP
-from attacks.util import construct_edge_sets_from_random_subgraph, get_edge_sets_among_nodes, \
-    compute_and_save
 from TIAs.util import construct_subgraph, overlaping_edges, topology_loss_sim, \
     construct_subgraph_for_GAP, k_hat_subgraph, cluster_matrix, get_edges, TOP_K_index_to_matrix, \
     TOP_K_index_to_matrix_PGR, topology_loss_sim_PGR

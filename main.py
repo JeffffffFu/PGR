@@ -13,6 +13,7 @@ from baseline.Lap_and_RR.RandEdge import graph_normal_training_perturb_RR
 from baseline.PPRL.GNNPrivacy import train_with_PPRL
 from baseline.PrivGraph_main.priv_graph import train_with_privGraph
 from utils.get_network import get_network
+from utils.train import graph_normal_training
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3"
 import argparse
@@ -24,7 +25,6 @@ import torch_geometric
 
 
 from data.dataload import load_data
-from graph_normal_training.normal_training import graph_normal_training
 from graph_reconstruction.graph_regenerate import graph_regenerate_different
 
 from utils.utils import split_dataset

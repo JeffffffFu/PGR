@@ -172,12 +172,6 @@ def main():
             index=False, header=False)
         print(f'{attack}|{network}|{algorithm}|{dataset_name}|{TPL_M}|{TPL_C}|{TPL_I}')
 
-        if algorithm == 'PGR':
-            TPL_M, TPL_C, TPL_I = TIA_PGR(algorithm,data, model, dense_matrix, features, regen_adj, labels, device, hops, seed)
-            pd.DataFrame([TPL_M, TPL_C, TPL_I]).to_csv(
-                f"TPL_result_TIA-PGR/_{attack}_{network}_{algorithm}_{dataset_name}_{eps}.csv",
-                index=False, header=False)
-            print(f'{attack}|{network}|{algorithm}|{dataset_name}|{TPL_M}|{TPL_C}|{TPL_I}')
 
     if attack=='TIA-PGR':
 

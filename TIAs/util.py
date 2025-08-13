@@ -435,7 +435,7 @@ def topology_loss_sim(subgraph_adj, binary_matrix,K,K_hat):
         print(C,K,K_hat)
         raise ValueError("C need to smaller than K or K_hat")
     TPL=C/(K+K_hat-C)
-    print(C, K, K_hat)
+   # print(C, K, K_hat)
     return TPL
 
 def topology_loss_sim_PGR(subgraph_adj, binary_matrix,K,K_hat,test_nodes):
@@ -448,7 +448,7 @@ def topology_loss_sim_PGR(subgraph_adj, binary_matrix,K,K_hat,test_nodes):
         raise ValueError("C need to smaller than K or K_hat")
     TPL_1=C/(K+K_hat-C)
     TPL_2=(K_hat-C)/((N**2/2)-K_hat+C)
-    print(TPL_1,TPL_2)
+  #  print(TPL_1,TPL_2)
     return max(TPL_1,TPL_2)
 
 def topology_sim_classifier(C,K,K_hat):

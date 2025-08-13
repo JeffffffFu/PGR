@@ -319,7 +319,7 @@ def topk_confidence_to_TPL_PGR(P, mia_test_label, K, K_hat, device, Knowledge,te
 
     TPL_1 = C / (K + K_hat - C)
     TPL_2=(K_hat-C)/((N**2/2)-K_hat+C)
-    print(TPL_1,TPL_2)
+   # print(TPL_1,TPL_2)
     return max(TPL_1,TPL_2)
 
 

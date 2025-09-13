@@ -15,8 +15,8 @@ pip install -r requirements.txt
 
 # Then install them manually
 pip install torch==1.13.1+cu116 torchvision==0.14.1+cu116 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cu116
+pip install torch-scatter==2.1.1 -f https://pytorch-geometric.com/whl/torch-1.13.1+cu116.html
 pip install torch-sparse==0.6.16 -f https://pytorch-geometric.com/whl/torch-1.13.1+cu116.html
-pip install torch-scatter==2.1.1 -f https://pytorch-geometric.com/whl/torch-1.13.1+cu116.htm
 ```
 
 ## Code Structure of PGR
@@ -32,6 +32,8 @@ pip install torch-scatter==2.1.1 -f https://pytorch-geometric.com/whl/torch-1.13
 
 ## Demo Experiments
 You can run the baseline directly with the following default parameters (For example in Table 2):
+
+'Original' means 'No Edge-DP'
 ```bash
 python main.py --attacks TIA --algorithm Original --dataset cora --eps 7
 python main.py --attacks TIA --algorithm GAP --dataset cora --eps 7

@@ -96,8 +96,8 @@ class DatasetLoader:
         'cora': Planetoid(root='./data', name='cora'),
         'citeseer': Planetoid(root='./data', name='citeseer'),
         'pubmed': Planetoid(root='./data', name='pubmed'),
-        'twitch_es': Twitch(root='./data/Twitch',name='ES') ,
-        'lastfm': LastFMAsia(root='./data/LastFMAsia'),
+      #  'twitch_es': Twitch(root='./data/Twitch',name='ES') ,
+      #  'lastfm': LastFMAsia(root='./data/LastFMAsia'),
     }
 
     def __init__(self,

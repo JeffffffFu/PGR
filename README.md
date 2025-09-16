@@ -88,5 +88,4 @@ For each of the above commands, the command console will finally display the fol
 ```
 ```
 
-## Instructions of Result
 

@@ -147,19 +147,19 @@ def main():
         raise ValueError("this algorithm is not exist")
 
     print(f'{attack}|{network}|{algorithm}|{dataset_name}|test_acc:{acc_test}')
-    pd.DataFrame([acc_test]).to_csv(
-        f"TPL_result_baseline/{attack}_{network}_{algorithm}_{dataset_name}_{eps}_acc.csv",
-        index=False, header=False)
-    if algorithm == 'PGR':
-        File_Path_Csv = os.getcwd() + f"/result_PGR/{network}/{algorithm}/{dataset_name}/{prune}/{mu}/{epochs_inner}/{hops}//"
-        if not os.path.exists(File_Path_Csv):
-            os.makedirs(File_Path_Csv)
-        pd.DataFrame([acc_test,num_priv_edges,num_rengen_edges]).to_csv(f"{File_Path_Csv}/acc.csv",index=False, header=False)
-        torch.save(regen_adj, f"{File_Path_Csv}/regen_edge.pth")
-        torch.save(model.state_dict(), f'{File_Path_Csv}/model.pt')
-        torch.save(labels, f'{File_Path_Csv}/labels.pth')
-        torch.save(features, f'{File_Path_Csv}/features.pth')
-        torch.save(device, f'{File_Path_Csv}/device.pth')
+    # pd.DataFrame([acc_test]).to_csv(
+    #     f"TPL_result_baseline/{attack}_{network}_{algorithm}_{dataset_name}_{eps}_acc.csv",
+    #     index=False, header=False)
+    # if algorithm == 'PGR':
+    #     File_Path_Csv = os.getcwd() + f"/result_PGR/{network}/{algorithm}/{dataset_name}/{prune}/{mu}/{epochs_inner}/{hops}//"
+    #     if not os.path.exists(File_Path_Csv):
+    #         os.makedirs(File_Path_Csv)
+    #     pd.DataFrame([acc_test,num_priv_edges,num_rengen_edges]).to_csv(f"{File_Path_Csv}/acc.csv",index=False, header=False)
+    #     torch.save(regen_adj, f"{File_Path_Csv}/regen_edge.pth")
+    #     torch.save(model.state_dict(), f'{File_Path_Csv}/model.pt')
+    #     torch.save(labels, f'{File_Path_Csv}/labels.pth')
+    #     torch.save(features, f'{File_Path_Csv}/features.pth')
+    #     torch.save(device, f'{File_Path_Csv}/device.pth')
 
     if attack=='TIA':
         if algorithm == 'GAP':
@@ -167,9 +167,9 @@ def main():
         else:
 
             TPL_M,TPL_C, TPL_I = TIA(algorithm, data, model, dense_matrix, features,regen_adj,labels, device,hops, seed)
-        pd.DataFrame([TPL_M, TPL_C, TPL_I]).to_csv(
-            f"TPL_result_baseline/{attack}_{network}_{algorithm}_{dataset_name}_{eps}.csv",
-            index=False, header=False)
+        # pd.DataFrame([TPL_M, TPL_C, TPL_I]).to_csv(
+        #     f"TPL_result_baseline/{attack}_{network}_{algorithm}_{dataset_name}_{eps}.csv",
+        #     index=False, header=False)
         print(f'{attack}|{network}|{algorithm}|{dataset_name}|{TPL_M}|{TPL_C}|{TPL_I}')
 
 
@@ -179,7 +179,10 @@ def main():
 
         print(f'{attack}|{network}|{algorithm}|{dataset_name}|{TPL_M}|{TPL_C}|{TPL_I}')
 
-
+    if algorithm == 'PGR':
+        print(f"model acc loss (utility):{(acc_test-0.8338)/0.8338} | M-TIA:{TPL_M*100.0} | C-TIA:{TPL_C*100.0} | I-TIA :{TPL_I*100.0}")
+    else:
+        print(f"model accuracy (utility):{acc_test*100.0} | M-TIA:{TPL_M*100.0} | C-TIA:{TPL_C*100.0} | I-TIA :{TPL_I*100.0}")
 
 if __name__ == '__main__':
      main()

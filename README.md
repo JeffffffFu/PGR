@@ -7,7 +7,10 @@ This repository is the official implementation of the paper:
 
 ## Installation
 
+You need to make sure there are GPU hardware and the CUDA Driver Version: 12.2， CUDA Toolkit Version: 11.6
+
 You can install all requirements with:
+
 ```bash
 conda create --name PGR python=3.9
 conda activate PGR
@@ -59,7 +62,10 @@ python main.py --attacks TIA --algorithm privGraph --dataset lastfm --eps 7
 python main.py --attacks TIA --algorithm LapEdge --dataset lastfm --eps 7  
 python main.py --attacks TIA --algorithm EdgeRand --dataset lastfm --eps 7  
 
-# you can choose different eps value (Figure 6)
+# you can choose different eps value for Figure 6
+
+For each of the above commands, the command console will finally display the following:
+'model accuracy (utility): {xxx} | M-TIA: {xxx} | C-TIA: {xxx} | I-TIA : {xxx}'
 ```
 
 You can run the PGR directly with the following default parameters on GCN model (For example in Table 3):
@@ -76,5 +82,11 @@ python main.py --attacks TIA --algorithm PGR --dataset emory --prune 0.05 --mu 0
 python main.py --attacks TIA --algorithm PGR --dataset cora --prune 0.2 --mu 0.0 --epochs_inner 1 --network GraphSAGE
 python main.py --attacks TIA --algorithm PGR --dataset citeseer --prune 0.2 --mu 0.0 --epochs_inner 1 --network GraphSAGE
 python main.py --attacks TIA --algorithm PGR --dataset emory --prune 0.05 --mu 0.0 --epochs_inner 1 --network GraphSAGE
+
+For each of the above commands, the command console will finally display the following:
+'model acc loss (utility): {xxx} | M-TIA: {xxx} | C-TIA: {xxx} | I-TIA : {xxx}'
 ```
+```
+
+## Instructions of Result
 

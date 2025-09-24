@@ -48,7 +48,7 @@ python main.py --attacks TIA --algorithm EdgeRand --dataset cora --eps 7
 
 python main.py --attacks TIA --algorithm Original --dataset citeseer --eps 7
 python main.py --attacks TIA --algorithm GAP --dataset citeseer --eps 7
-python main.py --attacks TIA --algorithm LPGNet--dataset citeseer --eps 7 
+python main.py --attacks TIA --algorithm LPGNet --dataset citeseer --eps 7 
 python main.py --attacks TIA --algorithm Eclipse --dataset citeseer --eps 7 
 python main.py --attacks TIA --algorithm privGraph --dataset citeseer --eps 7 
 python main.py --attacks TIA --algorithm LapEdge --dataset citeseer --eps 7  
@@ -56,7 +56,7 @@ python main.py --attacks TIA --algorithm EdgeRand --dataset citeseer --eps 7
 
 python main.py --attacks TIA --algorithm Original --dataset lastfm --eps 7
 python main.py --attacks TIA --algorithm GAP --dataset lastfm --eps 7
-python main.py --attacks TIA --algorithm LPGNet--dataset lastfm --eps 7 
+python main.py --attacks TIA --algorithm LPGNet --dataset lastfm --eps 7 
 python main.py --attacks TIA --algorithm Eclipse --dataset lastfm --eps 7 
 python main.py --attacks TIA --algorithm privGraph --dataset lastfm --eps 7 
 python main.py --attacks TIA --algorithm LapEdge --dataset lastfm --eps 7  

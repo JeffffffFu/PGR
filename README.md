@@ -40,7 +40,7 @@ You can run the baseline directly with the following default parameters (For exa
 ```bash
 python main.py --attacks TIA --algorithm Original --dataset cora --eps 7
 python main.py --attacks TIA --algorithm GAP --dataset cora --eps 7
-python main.py --attacks TIA --algorithm LPGNet--dataset cora --eps 7 
+python main.py --attacks TIA --algorithm LPGNet --dataset cora --eps 7 
 python main.py --attacks TIA --algorithm Eclipse --dataset cora --eps 7 
 python main.py --attacks TIA --algorithm privGraph --dataset cora --eps 7 
 python main.py --attacks TIA --algorithm LapEdge --dataset cora --eps 7  
@@ -87,6 +87,4 @@ For each of the above commands, the command console will finally display the fol
 'model acc loss (utility): {xxx} | M-TIA: {xxx} | C-TIA: {xxx} | I-TIA : {xxx}'
 ```
 ```
-
-## Instructions of Result
 

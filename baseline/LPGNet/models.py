@@ -53,7 +53,7 @@ class MultiMLP(nn.Module):
 
         print("MMLP input features size {}".format(input_size))
         self.input_size = input_size
-        self.model_list = []
+        self.model_list = nn.ModuleList()
         self.model_name = model_name
         print(run_config)
         model = MLP(
@@ -97,7 +97,6 @@ class MultiMLP(nn.Module):
         self.adjacency = test_adjacency
         self.input_size = test_features.size(1)
         # The adjacency matrix may not the same as the one used for testing
-        # so clear it out
         self.communities = {}
         if (not comms_file == None) and os.path.isfile(comms_file):
             self.communities = utils.load_comms_pkl(comms_file)

@@ -4,9 +4,7 @@
 This repository is the official implementation of the paper "[Safeguarding Graph Neural Networks against Topology Inference Attacks](https://arxiv.org/abs/2509.05429)" accepted by ACM CCS '25.
 
 In this paper, we propose a suite of Topology Inference Attacks (TIAs) that can reconstruct the structure of a target training graph using only black-box access to a GNN model. Our findings show that GNNs are highly susceptible to these attacks, and that existing edge-level differential privacy mechanisms are insufficient as they either fail to mitigate the risk or severely compromise model accuracy. To address this challenge, we introduce Private Graph Reconstruction (PGR), a novel defense framework designed to protect topology privacy while maintaining model accuracy. PGR is formulated as a bi-level optimization problem, where a synthetic training graph is iteratively generated using meta-gradients, and the GNN model is concurrently updated based on the evolving graph. Extensive experiments demonstrate that PGR significantly reduces topology leakage with minimal impact on model accuracy.
-
 ![Illustration of PGR](./PGR.jpg)
-
 ## Installation
 
 You need to make sure there are GPU hardware and the CUDA Driver Version: 12.2， CUDA Toolkit Version: 11.6

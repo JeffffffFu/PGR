@@ -88,7 +88,6 @@ python main.py --attacks TIA --algorithm PGR --dataset emory --prune 0.05 --mu 0
 For each of the above commands, the command console will finally display the following:
 'model acc loss (utility): {xxx} | M-TIA: {xxx} | C-TIA: {xxx} | I-TIA : {xxx}'
 ```
-```
 
 ## Citation
 ```bash
@@ -98,5 +97,4 @@ For each of the above commands, the command console will finally display the fol
   journal={arXiv preprint arXiv:2509.05429},
   year={2025}
 }
-```
 ```

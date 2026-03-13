@@ -90,10 +90,11 @@ For each of the above commands, the command console will finally display the fol
 
 ## Citation
 ```bash
-@article{fu2025safeguarding,
+@inproceedings{fu2025safeguarding,
   title={Safeguarding Graph Neural Networks against Topology Inference Attacks},
-  author={Fu, Jie and Yuan, Hong and Chen, Zhili and Wang, Wendy Hui},
-  journal={arXiv preprint arXiv:2509.05429},
+  author={Fu, Jie and Hong, Yuan and Chen, Zhili and Wang, Wendy Hui},
+  booktitle={Proceedings of the 2025 ACM SIGSAC Conference on Computer and Communications Security},
+  pages={2144--2158},
   year={2025}
 }
 ```
